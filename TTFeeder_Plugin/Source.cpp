@@ -570,7 +570,7 @@ bool CSourceInterface::ReadTicks(LPCSTR ticks, FeedData *inf)
 	}
 	inf->ticks_count++;
 	//----
-	ExtLogger.Out("%s %.4lf/%.4lf", inf->ticks[0].symbol, inf->ticks[0].bid, inf->ticks[0].ask);
+	//ExtLogger.Out("%s %.4lf/%.4lf", inf->ticks[0].symbol, inf->ticks[0].bid, inf->ticks[0].ask);
 	//---- return succesful result
 	return(TRUE);
 }

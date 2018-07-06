@@ -37,6 +37,9 @@ protected:
    //--- counters
    UINT              m_read_news_count;// counter for NewsRead function
    UINT              m_free_news_count;// counter for NewsFree function
+public:
+   char*			m_client_name;	   // client name
+   void				SetClientName(char* data);
 
 public:
                      CSourceInterface(void);

@@ -298,6 +298,34 @@ bool CSourceInterface::Login(FeedData *inf)
 	if (inf == NULL) return(FALSE);
 	m_loginflag = FALSE;
 	m_waiting_news = FALSE;
+	//---- wait for name
+	for (;;)
+	{
+		if ((res = ReadCheckString(tmp, sizeof(tmp) - 1, "Name: "))<0)
+		{
+			strcpy(inf->result_string, "name failed [name field]");
+			ExtLogger.Out("Name: %s", inf->result_string);
+			return(FALSE);
+		}
+		if (res == 1) // found
+		{
+			_snprintf(tmp, sizeof(tmp) - 1, "%s\r\n", m_client_name);
+			if (SendString(tmp) == FALSE)
+			{
+				strcpy(inf->result_string, "connection lost");
+				ExtLogger.Out("Name: %s", inf->result_string);
+				return(FALSE);
+			}
+			break;
+		}
+		count++;
+		if (count>3)
+		{
+			strcpy(inf->result_string, "invalid headers [name field]");
+			ExtLogger.Out("Name: %s", inf->result_string);
+			return(FALSE);
+		}
+	}
 	//---- wait for login
 	for (;;)
 	{
@@ -412,10 +440,12 @@ bool CSourceInterface::Login(FeedData *inf)
 //+------------------------------------------------------------------+
 int CSourceInterface::Read(FeedData *inf)
 {
+	
 	DWORD   ctm;
 	//---- check
 	if (inf == NULL || m_buffer == NULL)      return(FALSE);
 	inf->ticks_count = 0;
+	//ExtLogger.Out("419: %s", m_client_name);
 	//---- есть синтетические инструменты?
 	if (m_syntetics.GetTicks(inf) != FALSE) return(TRUE);
 	//---- is connection opened?
@@ -798,5 +828,12 @@ int CSourceInterface::DataParseData(char *data, const int len)
 	}
 	//---
 	return(TRUE);
+}
+//+------------------------------------------------------------------+
+//|  Other Function                                                  |
+//+------------------------------------------------------------------+
+void CSourceInterface::SetClientName(char *data)
+{
+	m_client_name = data;
 }
 //+------------------------------------------------------------------+

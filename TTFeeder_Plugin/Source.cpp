@@ -1,4 +1,4 @@
-//+------------------------------------------------------------------+
+п»ї//+------------------------------------------------------------------+
 //|                                                        UniFeeder |
 //|                   Copyright 2001-2014, MetaQuotes Software Corp. |
 //|                                        http://www.metaquotes.net |
@@ -168,12 +168,12 @@ bool CSourceInterface::SendString(LPCSTR buf)
 	if (buf == NULL || m_socket == INVALID_SOCKET) return(FALSE);
 	//---- send data
 	int len = strlen(buf);
-	while (len>0)
+	while (len > 0)
 	{
-		if ((res = send(m_socket, buf, len, 0))<1)
+		if ((res = send(m_socket, buf, len, 0)) < 1)
 		{
 			//---- check fatal error
-			if (WSAGetLastError() != WSAEWOULDBLOCK || count>10)
+			if (WSAGetLastError() != WSAEWOULDBLOCK || count > 10)
 			{
 				Close();
 				return(FALSE);
@@ -189,6 +189,33 @@ bool CSourceInterface::SendString(LPCSTR buf)
 	return(TRUE);
 }
 //+------------------------------------------------------------------+
+//| Send Ping                                                      |
+//+------------------------------------------------------------------+
+bool CSourceInterface::SendPing()
+{
+	const char* str = "> Ping";
+	int count = 0, res;
+	//---- check
+	if (m_socket == INVALID_SOCKET) return(FALSE);
+	//---- send data
+	int len = strlen(str) + 1;
+
+	if ((res = send(m_socket, str, len, 0)) < 1)
+	{
+		//---- check fatal error
+		if (WSAGetLastError() != WSAEWOULDBLOCK || count > 10)
+		{
+			Close();
+			return(FALSE);
+		}
+		//---- write blocking, wait and read further
+		count++;
+		Sleep(50);
+	}
+	//----
+	return(TRUE);
+}
+//+------------------------------------------------------------------+
 //| Read string                                                      |
 //+------------------------------------------------------------------+
 bool CSourceInterface::ReadString(char *buf, const int maxlen)
@@ -197,12 +224,12 @@ bool CSourceInterface::ReadString(char *buf, const int maxlen)
 	//---- checks
 	if (buf == NULL || m_socket == INVALID_SOCKET) return(FALSE);
 	//---- read data
-	while (len<maxlen)
+	while (len < maxlen)
 	{
 		if (recv(m_socket, buf, 1, 0) != 1)
 		{
 			//---- check fatal error
-			if (WSAGetLastError() != WSAEWOULDBLOCK || count>10)
+			if (WSAGetLastError() != WSAEWOULDBLOCK || count > 10)
 			{
 				Close();
 				return(FALSE);
@@ -229,12 +256,12 @@ bool CSourceInterface::ReadData(char *buf, int len)
 	//---- checks
 	if (buf == NULL || m_socket == INVALID_SOCKET) return(FALSE);
 	//---- read data
-	while (len>0)
+	while (len > 0)
 	{
-		if ((ln = recv(m_socket, buf, len, 0))<1)
+		if ((ln = recv(m_socket, buf, len, 0)) < 1)
 		{
 			//---- check fatal error
-			if (WSAGetLastError() != WSAEWOULDBLOCK || count>10)
+			if (WSAGetLastError() != WSAEWOULDBLOCK || count > 10)
 			{
 				Close();
 				return(FALSE);
@@ -260,12 +287,12 @@ int CSourceInterface::ReadCheckString(char *buf, const int maxlen, LPCSTR string
 	//---- checks
 	if (buf == NULL || m_socket == INVALID_SOCKET || string == NULL) return(-1);
 	//---- read data
-	while (len<maxlen)
+	while (len < maxlen)
 	{
 		if (recv(m_socket, buf, 1, 0) != 1)
 		{
 			//---- check fatal error
-			if (WSAGetLastError() != WSAEWOULDBLOCK || count>10)
+			if (WSAGetLastError() != WSAEWOULDBLOCK || count > 10)
 			{
 				Close();
 				return(-1);
@@ -301,7 +328,7 @@ bool CSourceInterface::Login(FeedData *inf)
 	//---- wait for name
 	for (;;)
 	{
-		if ((res = ReadCheckString(tmp, sizeof(tmp) - 1, "Name: "))<0)
+		if ((res = ReadCheckString(tmp, sizeof(tmp) - 1, "Name: ")) < 0)
 		{
 			strcpy(inf->result_string, "name failed [name field]");
 			ExtLogger.Out("Name: %s", inf->result_string);
@@ -319,7 +346,7 @@ bool CSourceInterface::Login(FeedData *inf)
 			break;
 		}
 		count++;
-		if (count>3)
+		if (count > 3)
 		{
 			strcpy(inf->result_string, "invalid headers [name field]");
 			ExtLogger.Out("Name: %s", inf->result_string);
@@ -329,7 +356,7 @@ bool CSourceInterface::Login(FeedData *inf)
 	//---- wait for login
 	for (;;)
 	{
-		if ((res = ReadCheckString(tmp, sizeof(tmp) - 1, "Login: "))<0)
+		if ((res = ReadCheckString(tmp, sizeof(tmp) - 1, "Login: ")) < 0)
 		{
 			strcpy(inf->result_string, "login failed [login field]");
 			ExtLogger.Out("Login: %s", inf->result_string);
@@ -347,7 +374,7 @@ bool CSourceInterface::Login(FeedData *inf)
 			break;
 		}
 		count++;
-		if (count>3)
+		if (count > 3)
 		{
 			strcpy(inf->result_string, "invalid headers [login field]");
 			ExtLogger.Out("Login: %s", inf->result_string);
@@ -358,7 +385,7 @@ bool CSourceInterface::Login(FeedData *inf)
 	count = 0;
 	for (;;)
 	{
-		if ((res = ReadCheckString(tmp, sizeof(tmp) - 1, "Password: "))<0)
+		if ((res = ReadCheckString(tmp, sizeof(tmp) - 1, "Password: ")) < 0)
 		{
 			strcpy(inf->result_string, "login failed [password field]");
 			ExtLogger.Out("Login: %s", inf->result_string);
@@ -376,7 +403,7 @@ bool CSourceInterface::Login(FeedData *inf)
 			break;
 		}
 		count++;
-		if (count>3)
+		if (count > 3)
 		{
 			strcpy(inf->result_string, "invalid headers [password field]");
 			ExtLogger.Out("Login: %s", inf->result_string);
@@ -387,7 +414,7 @@ bool CSourceInterface::Login(FeedData *inf)
 	count = 0;
 	for (;;)
 	{
-		if ((res = ReadCheckString(tmp, sizeof(tmp) - 1, "Access "))<0)
+		if ((res = ReadCheckString(tmp, sizeof(tmp) - 1, "Access ")) < 0)
 		{
 			strcpy(inf->result_string, "login failed [access field]");
 			ExtLogger.Out("Login: %s", inf->result_string);
@@ -395,7 +422,7 @@ bool CSourceInterface::Login(FeedData *inf)
 		}
 		if (res == 1) break;
 		count++;
-		if (count>3)
+		if (count > 3)
 		{
 			strcpy(inf->result_string, "invalid headers [access field]");
 			ExtLogger.Out("Login: %s", inf->result_string);
@@ -440,13 +467,13 @@ bool CSourceInterface::Login(FeedData *inf)
 //+------------------------------------------------------------------+
 int CSourceInterface::Read(FeedData *inf)
 {
-	
+
 	DWORD   ctm;
 	//---- check
 	if (inf == NULL || m_buffer == NULL)      return(FALSE);
 	inf->ticks_count = 0;
 	//ExtLogger.Out("419: %s", m_client_name);
-	//---- есть синтетические инструменты?
+	//---- пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ?
 	if (m_syntetics.GetTicks(inf) != FALSE) return(TRUE);
 	//---- is connection opened?
 	if (m_socket == INVALID_SOCKET)
@@ -468,20 +495,27 @@ int CSourceInterface::Read(FeedData *inf)
 	//---- read data
 	while (m_socket != INVALID_SOCKET)
 	{
-		//---- send ping every minute
+		//---- send ' every1seconds
 		ctm = GetTickCount();
-		if (ctm<m_lasttime) m_lasttime = ctm - 1000;
-		if ((ctm - m_lasttime)>60000)
+		if (ctm < m_lasttime) m_lasttime = ctm - 1000;
+		if ((ctm - m_lasttime) > 1000)
 		{
 			//---- load syntetic base
 			m_syntetics.Load();
 			//----
 			m_lasttime = ctm;
-			if (SendString("> Ping\r\n") == FALSE)
+			if (SendPing() == FALSE)
 			{
 				strcpy(inf->result_string, "ping failed");
 				ExtLogger.Out("Read: %s", inf->result_string);
-				return(FALSE);
+				//---- try connect
+				if (Connect(m_server, m_login, m_password))
+				{
+					ExtLogger.Out("Reconnected");
+				}
+			}
+			else {
+				ExtLogger.Out("Sent ping");
 			}
 		}
 		//---- check data
@@ -516,12 +550,12 @@ int CSourceInterface::Read(FeedData *inf)
 				return(FALSE);
 			}
 			//---- check free space for new account
-			if (inf->ticks_count<COUNTOF(inf->ticks)) continue;
+			if (inf->ticks_count < COUNTOF(inf->ticks)) continue;
 			//---- break parsing
 			break;
 		}
 		//---- check ticks
-		if (inf->ticks_count>0)
+		if (inf->ticks_count > 0)
 		{
 			//---- update syntetics
 			m_syntetics.AddQuotes(inf);
@@ -586,13 +620,13 @@ bool CSourceInterface::ReadTicks(LPCSTR ticks, FeedData *inf)
 		if (*np == ' ') params++;
 		np++;
 	}
-	if (params>2) cp = strstr(cp + 1, " ");  // skip [time] parameter
+	if (params > 2) cp = strstr(cp + 1, " ");  // skip [time] parameter
 											 //---- define prices
 	inf->ticks[inf->ticks_count].bid = atof(cp + 1);
 	if ((cp = strstr(cp + 1, " ")) == NULL)      return(TRUE);
 	inf->ticks[inf->ticks_count].ask = atof(cp + 1);
 	//---- check prices
-	if (inf->ticks[inf->ticks_count].bid <= 0 || inf->ticks[inf->ticks_count].ask <= 0 || inf->ticks[inf->ticks_count].bid>inf->ticks[inf->ticks_count].ask)
+	if (inf->ticks[inf->ticks_count].bid <= 0 || inf->ticks[inf->ticks_count].ask <= 0 || inf->ticks[inf->ticks_count].bid > inf->ticks[inf->ticks_count].ask)
 	{
 		_snprintf(inf->result_string, sizeof(inf->result_string) - 1, "Read: invalid bid/ask '%s'", inf->ticks[inf->ticks_count].symbol);
 		ExtLogger.Out("%s", inf->result_string);
@@ -684,7 +718,7 @@ bool CSourceInterface::ReadNews(FeedNews *inf)
 		return(TRUE);
 	}
 	//---- check for maximum body length
-	if (news.len<0 || news.len >= inf->MAX_NEWS_BODY_LEN)
+	if (news.len < 0 || news.len >= inf->MAX_NEWS_BODY_LEN)
 	{
 		ExtLogger.Out("ReadNews: too long news body [%d / %d]", news.len, inf->MAX_NEWS_BODY_LEN);
 		return(FALSE);
@@ -731,20 +765,20 @@ int CSourceInterface::DataRead(void)
 	int   len, res;
 	char *cp;
 	//--- check data in socket
-	if ((len = IsReadible())<1) return(TRUE);
+	if ((len = IsReadible()) < 1) return(TRUE);
 	//--- move unparsed data
-	if (m_data != NULL && m_data_readed>0)
+	if (m_data != NULL && m_data_readed > 0)
 	{
-		if ((m_data_total - m_data_readed)>0) memmove(m_data, m_data + m_data_readed, m_data_total - m_data_readed);
+		if ((m_data_total - m_data_readed) > 0) memmove(m_data, m_data + m_data_readed, m_data_total - m_data_readed);
 		m_data_total -= m_data_readed;
 		m_data[m_data_total] = 0;
 		m_data_readed = 0;
 	}
 	//--- check free space
-	if ((m_data_total + len)>m_data_max || m_data == NULL)
+	if ((m_data_total + len) > m_data_max || m_data == NULL)
 	{
 		//--- check buffer size
-		if ((m_data_total + len)>READ_BUFFER_MAX)
+		if ((m_data_total + len) > READ_BUFFER_MAX)
 		{
 			ExtLogger.Out("Read: incoming buffer too large %d bytes", m_data_total + len);
 			return(FALSE);
@@ -758,14 +792,14 @@ int CSourceInterface::DataRead(void)
 		//--- copy old buffer
 		if (m_data != NULL)
 		{
-			if (m_data_total>0) memcpy(cp, m_data, m_data_total);
+			if (m_data_total > 0) memcpy(cp, m_data, m_data_total);
 			free(m_data);
 		}
 		m_data = cp;
 		m_data_max = m_data_total + len + READ_BUFFER_STEP;
 	}
 	//--- read data to buffer
-	if ((res = recv(m_socket, m_data + m_data_total, len, 0))<1) return(FALSE);
+	if ((res = recv(m_socket, m_data + m_data_total, len, 0)) < 1) return(FALSE);
 	m_data_total += res;
 	m_data[m_data_total] = 0;
 	//--- return
@@ -777,13 +811,13 @@ int CSourceInterface::DataRead(void)
 int CSourceInterface::DataParseLine(char *buf, const int maxlen)
 {
 	//--- check params
-	if (buf == NULL || maxlen<1 || m_data == NULL || m_data_total<1) return(FALSE);
+	if (buf == NULL || maxlen < 1 || m_data == NULL || m_data_total < 1) return(FALSE);
 	//--- prepare data
 	int   len = 0;
 	char *start = m_data + m_data_readed;
 	char *end = m_data + m_data_total;
 	//--- parse string from buffer
-	while (start<end && len<maxlen)
+	while (start < end && len < maxlen)
 	{
 		//--- check string end
 		if (*start == '\n')
@@ -807,7 +841,7 @@ int CSourceInterface::DataParseLine(char *buf, const int maxlen)
 int CSourceInterface::DataParseData(char *data, const int len)
 {
 	//--- check params
-	if (data == NULL || len<1 || m_data == NULL) return(FALSE);
+	if (data == NULL || len < 1 || m_data == NULL) return(FALSE);
 	//---- 
 	if ((m_data_total - m_data_readed) >= (UINT)len)
 	{
@@ -818,7 +852,7 @@ int CSourceInterface::DataParseData(char *data, const int len)
 	{
 		//--- need to read some data from socket
 		int buf_data_size = m_data_total - m_data_readed;
-		if (buf_data_size>0)
+		if (buf_data_size > 0)
 		{
 			memcpy(data, m_data + m_data_readed, buf_data_size);
 			m_data_readed += buf_data_size;
